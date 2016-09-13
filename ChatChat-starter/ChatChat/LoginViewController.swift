@@ -22,24 +22,32 @@
 
 import UIKit
 class LoginViewController: UIViewController {
-  
+    
     var ref: FIRDatabaseReference!
     
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    ref = FIRDatabase.database().referenceFromURL("https://fir-demo-43879.firebaseio.com/")
-    
-  }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        ref = FIRDatabase.database().referenceFromURL("https://fir-demo-43879.firebaseio.com/")
+        
+    }
 
   @IBAction func loginDidTouch(sender: AnyObject) {
     FIRAuth.auth()?.signInAnonymouslyWithCompletion({ (user, error) in
         if error != nil { print(error?.description); return }
         print(user?.uid)
+        print(user?.refreshToken)
         self.performSegueWithIdentifier("LoginToChat", sender: nil) // 3
         
     })
-
   }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        super.prepareForSegue(segue, sender: sender)
+        guard let naV = segue.destinationViewController as? UINavigationController else { return }
+        guard let chatVC = naV.viewControllers.first as? ChatViewController else { return }
+        chatVC.senderId = FIRAuth.auth()?.currentUser?.uid
+        chatVC.senderDisplayName = ""
+    }
   
 }
 
